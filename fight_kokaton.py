@@ -168,10 +168,17 @@ def main():
                 time.sleep(1)
                 return
         
+<<<<<<< HEAD
         for j, bomb in enumerate(bombs):
             if beam is not None:
                 if beam.rct.colliderect(bomb.rct):  # ビームと爆弾が衝突したら
                     beam, bombs[j] = None, None
+=======
+        if beam is not None:
+            if bomb is not None:
+                if beam.rct.colliderect(bomb.rct):  # ビームと爆弾が衝突
+                    beam, bomb = None, None
+>>>>>>> gameover
                     bird.change_img(6, screen)
                     pg.display.update()              
         bombs = [bomb for bomb in bombs if bomb is not None]
