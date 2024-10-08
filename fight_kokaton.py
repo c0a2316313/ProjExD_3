@@ -176,40 +176,47 @@ def main():
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
     score = Score()  # Scoreインスタンスの生成
     clock = pg.time.Clock()
-    beam = None
+    beams = []  # 複数ビームを管理するリスト
 
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
-                beam = Beam(bird)  # スペースキーでビーム発射
+                # スペースキーが押されたらビームを生成し、リストに追加
+                beams.append(Beam(bird))
 
         screen.blit(bg_img, [0, 0])
 
         # 爆弾とこうかとんの衝突判定
-        for bomb in bombs[:]:  # 爆弾のリストをスライスしてコピーを操作
+        for bomb in bombs[:]:  # リストのコピーでループ
             if bird.rct.colliderect(bomb.rct):
-                bird.change_img(8, screen)
+                fonto = pg.font.Font(None, 80)
+                txt = fonto.render("Game Over", True, (255, 0, 0))
+                screen.blit(txt, [WIDTH//2-150, HEIGHT//2])
                 pg.display.update()
-                time.sleep(1)
+                time.sleep(5)
                 return
 
         # ビームと爆弾の衝突判定
-        if beam is not None:  # ビームが存在する場合のみ処理
-            for bomb in bombs[:]:  # 爆弾のリストをスライスしてコピーを操作
-                if beam is not None and bomb is not None and beam.rct.colliderect(bomb.rct):  # ビームと爆弾の衝突をチェック
-                    bombs.remove(bomb)  # 衝突した爆弾をリストから削除
-                    beam = None  # ビームを消去
-                    bird.change_img(6, screen)  # こうかとんの画像を変更
-                    score.add_score()  # スコアを1点加算
+        for beam in beams[:]:  # リストのコピーでループ
+            for bomb in bombs[:]:
+                if beam.rct.colliderect(bomb.rct):  # 衝突判定
+                    bombs.remove(bomb)  # 爆弾をリストから削除
+                    beams.remove(beam)  # ビームもリストから削除
+                    bird.change_img(6, screen)
+                    score.add_score()  # スコアを加算
+                    break
+
+        # ビームの更新と画面外処理
+        beams = [beam for beam in beams if beam.rct.right < WIDTH]  # 画面外のビームを削除
 
         # こうかとんの操作
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
 
-        # ビームの更新処理
-        if beam is not None:
+        # ビームの描画
+        for beam in beams:
             beam.update(screen)
 
         # 爆弾の更新処理
@@ -221,6 +228,7 @@ def main():
 
         pg.display.update()
         clock.tick(50)
+
 
 
 
